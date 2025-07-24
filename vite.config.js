@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base:
-    process.env.NODE_ENV === "production" ? "/mediapipe-example-pose/" : "/",
+  base: process.env.NODE_ENV === "production" ? "/MediapipeExamplePose/" : "/",
   root: "./src",
   build: {
     outDir: "../dist",
