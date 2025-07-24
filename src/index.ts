@@ -18,7 +18,14 @@ import {
   DrawingUtils,
 } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 
+const GOOGLE_CLIENT_ID = "20534293634-lq8delskfdf17ud7laa0goq9oq3i8tas.apps.googleusercontent.com";
+
 const demosSection = document.getElementById("demos");
+const authContainer = document.getElementById("auth-container");
+
+let auth2;
+
+declare const gapi: any;
 
 let poseLandmarker: PoseLandmarker = undefined;
 let runningMode = "IMAGE";
@@ -193,3 +200,52 @@ async function predictWebcam() {
     window.requestAnimationFrame(predictWebcam);
   }
 }
+
+function renderAuth() {
+  const isSignedIn = auth2.isSignedIn.get();
+  if (isSignedIn) {
+    const profile = auth2.currentUser.get().getBasicProfile();
+    authContainer.innerHTML = `
+      <div class="auth-info">
+        <img src="${profile.getImageUrl()}" class="user-avatar">
+        <button id="logout-button" class="mdc-button mdc-button--raised">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label">LOGOUT</span>
+        </button>
+      </div>
+    `;
+    document.getElementById("logout-button").addEventListener("click", signOut);
+  } else {
+    authContainer.innerHTML = `
+      <button id="login-button" class="mdc-button mdc-button--raised">
+        <span class="mdc-button__ripple"></span>
+        <span class="mdc-button__label">LOGIN</span>
+      </button>
+    `;
+    document.getElementById("login-button").addEventListener("click", signIn);
+  }
+}
+
+function signIn() {
+  auth2.signIn();
+}
+
+function signOut() {
+  auth2.signOut();
+}
+
+function onAuthChange() {
+  renderAuth();
+}
+
+window.onload = () => {
+  gapi.load('auth2', () => {
+    auth2 = gapi.auth2.init({
+      client_id: GOOGLE_CLIENT_ID,
+    });
+    auth2.isSignedIn.listen(onAuthChange);
+    auth2.then(() => {
+      renderAuth();
+    });
+  });
+};
